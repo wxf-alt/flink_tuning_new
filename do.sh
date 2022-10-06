@@ -16,7 +16,8 @@ remoteJar=${remoteDir}/${jar}
 #class=com.atguigu.bigdata.tune.UUidApp
 #class=com.atguigu.bigdata.tune.BackpressureApp
 #class=com.atguigu.bigdata.tune.SkewApp1
-class=com.atguigu.bigdata.tune.SkewApp2
+#class=com.atguigu.bigdata.tune.SkewApp2
+class=com.atguigu.bigdata.tune.SqlApp
 otherArgs=" \
 -p 4 \
 -Drest.flamegraph.enabled=true \
@@ -25,7 +26,7 @@ otherArgs=" \
 -Dstate.backend.latency-track.keyed-state-enabled=true \
 -Dmetrics.latency.interval=30000 \
 "
-main_args="--two-phase true --random-num 16 "
+main_args=" --demo count --minibatch true --local-global true"
 # 通过 ssh 的方式在远程提交 jar
 
 cmd="${flink} run -d \
