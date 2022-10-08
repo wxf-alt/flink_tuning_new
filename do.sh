@@ -21,6 +21,7 @@ remoteJar=${remoteDir}/${jar}
 class=com.atguigu.bigdata.tune.SqlApp
 otherArgs=" \
 -p 4 \
+-Dclassloader.check-leaked-classloader=false \
 -Drest.flamegraph.enabled=true \
 -Dtaskmanager.numberOfTaskSlots=4 \
 -Dtaskmanager.memory.process.size=4096m \
