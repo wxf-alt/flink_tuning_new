@@ -26,7 +26,7 @@ otherArgs=" \
 -Dstate.backend.latency-track.keyed-state-enabled=true \
 -Dmetrics.latency.interval=30000 \
 "
-main_args=" --demo count --minibatch true --local-global true"
+main_args=" --demo distinct --minibatch true --split-distinct true "
 # 通过 ssh 的方式在远程提交 jar
 
 cmd="${flink} run -d \
