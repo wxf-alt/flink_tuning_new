@@ -1,4 +1,5 @@
 #!/bin/bash
+# 本脚本运行在 mac 或者 linux key 自动把 jar 一键部署到 yarn
 jar=flink_tuning-1.0-SNAPSHOT.jar
 localDir=/Users/lzc/Desktop/class_code/flink_tuning/target
 remoteHost=hadoop162
@@ -26,7 +27,8 @@ otherArgs=" \
 -Dstate.backend.latency-track.keyed-state-enabled=true \
 -Dmetrics.latency.interval=30000 \
 "
-main_args=" --demo distinct --minibatch true --split-distinct true "
+#main_args=" --demo distinct --minibatch true --split-distinct true "
+main_args=" --demo dim-difcount-filter "
 # 通过 ssh 的方式在远程提交 jar
 
 cmd="${flink} run -d \

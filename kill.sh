@@ -1,4 +1,5 @@
 #!/bin/bash
+# 本脚本一键杀死yarn 上所有的app
 remoteHost=hadoop162
 remoteUser=atguigu
 ssh ${remoteUser}@${remoteHost} \
