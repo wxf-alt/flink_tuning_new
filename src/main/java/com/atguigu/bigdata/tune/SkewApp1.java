@@ -45,7 +45,7 @@ public class SkewApp1 {
                 .returns(Types.TUPLE(Types.STRING, Types.LONG));
 
 
-        // 按照mid分组，统计每个mid出现的次数
+        // 按照mid分组，统计每个mid出现的次数  --name zs
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
         boolean isLocalKeyBy = parameterTool.getBoolean("local-keyBy", false);
         if (!isLocalKeyBy) {

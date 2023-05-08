@@ -60,9 +60,10 @@ public class SQLDataGenApp {
         
         
         tEnv.executeSql(orderSql);
-        tEnv.executeSql(userSql);
+//        tEnv.executeSql(userSql);
         
-        tEnv.executeSql("select * from order_info").print();
-        //        tableEnv.executeSql("select * from user_info").print();
+//        tEnv.executeSql("select * from order_info").print();
+        //        tableEnv.executeSql("select * fromexecute user_info").print();
+        tEnv.sqlQuery("select * from order_info").execute().print();
     }
 }

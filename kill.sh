@@ -7,4 +7,3 @@ ssh ${remoteUser}@${remoteHost} \
  | awk '/application_/{print \$1}' \
  | xargs yarn application -kill 1>/dev/null 2>&1
 "
-

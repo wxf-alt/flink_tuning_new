@@ -1,12 +1,10 @@
 package com.atguigu.bigdata.tune;
 
-import com.atguigu.bigdata.tune.bean.OrderInfo;
 import com.atguigu.bigdata.tune.bean.UserInfo;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.datagen.DataGeneratorSource;
-import org.apache.flink.streaming.api.functions.source.datagen.RandomGenerator;
 import org.apache.flink.streaming.api.functions.source.datagen.SequenceGenerator;
 
 /**
@@ -19,8 +17,8 @@ public class DataStreamDataGenApp {
         conf.setInteger("rest.port", 2000);
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         env.setParallelism(1);
-    
-        env
+        
+        /*env
             .addSource(new DataGeneratorSource<>(new RandomGenerator<OrderInfo>() {
                 @Override
                 public OrderInfo next() {
@@ -33,24 +31,23 @@ public class DataStreamDataGenApp {
                 }
             }))
             .returns(OrderInfo.class)
-            .print("order");
-    
-    
+            .print("order");*/
+        
+        
         env
-            .addSource(new DataGeneratorSource<UserInfo>(
-                new SequenceGenerator<UserInfo>(1, 1000000) {
-                    RandomDataGenerator random = new RandomDataGenerator();
+            .addSource(new DataGeneratorSource<UserInfo>(new SequenceGenerator<UserInfo>(1, 1000000) {
+                RandomDataGenerator random = new RandomDataGenerator();
                 
-                    @Override
-                    public UserInfo next() {
-                        return new UserInfo(
-                            valuesToEmit.peek().intValue(),
-                            valuesToEmit.poll().longValue(),
-                            random.nextInt(1, 100),
-                            random.nextInt(0, 1)
-                        );
-                    }
+                @Override
+                public UserInfo next() {
+                    return new UserInfo(
+                        valuesToEmit.peek().intValue(),
+                        valuesToEmit.poll().longValue(),
+                        random.nextInt(1, 100),
+                        random.nextInt(0, 1)
+                    );
                 }
+            }
             ))
             .returns(UserInfo.class)
             .print("user");

@@ -38,8 +38,8 @@ public class LocalKeyByFlatMapFunc extends RichFlatMapFunction<Tuple2<String, Lo
     @Override
     public void flatMap(Tuple2<String, Long> value, Collector<Tuple2<String, Long>> out) throws Exception {
         // 1、将新来的数据添加到 buffer 中,本地聚合
-        Long count = localBuffer.getOrDefault(value.f0, 0L);
-        localBuffer.put(value.f0, count + 1);
+        Long count = localBuffer.getOrDefault(value.f0, 0L);  // hello =10
+        localBuffer.put(value.f0, count + 1);  //hello =11
 
         // 2、如果到达设定的批次，则将 buffer 中的数据发送到下游
         if (currentSize.incrementAndGet() >= batchSize) {

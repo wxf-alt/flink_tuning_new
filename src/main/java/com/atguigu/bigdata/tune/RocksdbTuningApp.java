@@ -19,14 +19,19 @@ public class RocksdbTuningApp {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.enableCheckpointing(3000);
         EmbeddedRocksDBStateBackend rocksdb = new EmbeddedRocksDBStateBackend();
+        
         rocksdb.setPredefinedOptions(PredefinedOptions.DEFAULT);
         env.setStateBackend(rocksdb);
+        // 默认情况下的严格一次,都是 checkpoint 对齐(barrier 对齐)
+        // 从 1.11 开始, flink 开始支持非对齐的 checkpoint(非对齐的 barrier)实现严格一次.
+        //env.getCheckpointConfig().enableUnalignedCheckpoints();
         
         CheckpointConfig checkpointConfig = env.getCheckpointConfig();
         checkpointConfig.setCheckpointStorage("hdfs://hadoop162:8020/flink-tuning/ck");
         checkpointConfig.setMinPauseBetweenCheckpoints(1000);
         checkpointConfig.setTolerableCheckpointFailureNumber(5);
         checkpointConfig.setCheckpointTimeout(60*1000);
+        
         checkpointConfig.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
 
         SingleOutputStreamOperator<JSONObject> jsonobjDS = env

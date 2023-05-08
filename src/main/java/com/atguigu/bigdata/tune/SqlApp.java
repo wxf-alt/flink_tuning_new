@@ -38,7 +38,6 @@ public class SqlApp {
         checkpointConfig.setCheckpointTimeout(TimeUnit.MINUTES.toMillis(1));
         checkpointConfig.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         
-        
         SingleOutputStreamOperator<AppCommonWithDay> commonDayDS = env
             .addSource(new MockSourceFunction())
             .map(new MapFunction<String, AppCommonWithDay>() {
@@ -59,6 +58,7 @@ public class SqlApp {
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
         tableEnv.getConfig().setIdleStateRetention(Duration.ofDays(1));
         
+        //从 main 函数读取参数
         ParameterTool parameterTool = ParameterTool.fromArgs(args);
         boolean isMiniBatch = parameterTool.getBoolean("minibatch", false);
         boolean isLocalGlobal = parameterTool.getBoolean("local-global", false);
@@ -143,6 +143,8 @@ public class SqlApp {
             ")";
         tableEnv.executeSql(printSql);
         tableEnv.executeSql("insert into print_table " + execSql);
+        
+       
         
     }
 }

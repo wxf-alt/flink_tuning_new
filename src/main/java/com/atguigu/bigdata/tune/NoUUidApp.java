@@ -15,51 +15,52 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 
 public class NoUUidApp {
-    public static void main(String[] args) throws Exception  {
+    public static void main(String[] args) throws Exception {
         
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-    
+        
         env.enableCheckpointing(3000);
         EmbeddedRocksDBStateBackend rocksdb = new EmbeddedRocksDBStateBackend();
         rocksdb.setPredefinedOptions(PredefinedOptions.DEFAULT);
         env.setStateBackend(rocksdb);
-    
+        
         CheckpointConfig checkpointConfig = env.getCheckpointConfig();
         checkpointConfig.setCheckpointStorage("hdfs://hadoop162:8020/flink-tuning/ck");
         checkpointConfig.setMinPauseBetweenCheckpoints(1000);
         checkpointConfig.setTolerableCheckpointFailureNumber(5);
-        checkpointConfig.setCheckpointTimeout(60*1000);
+        checkpointConfig.setCheckpointTimeout(60 * 1000);
         checkpointConfig.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
     
     
         SingleOutputStreamOperator<JSONObject> jsonobjDS = env
-                .addSource(new MockSourceFunction())
-                .map(JSONObject::parseObject);
-
-
+            .addSource(new MockSourceFunction())
+            .map(JSONObject::parseObject)
+            .filter(x -> true);
+        
+        
         // 按照mid分组，新老用户修正
         SingleOutputStreamOperator<JSONObject> jsonWithNewFlagDS = jsonobjDS
-                .keyBy(data -> data.getJSONObject("common").getString("mid"))
-                .map(new NewMidRichMapFunc());
-
-
+            .keyBy(data -> data.getJSONObject("common").getString("mid"))
+            .map(new NewMidRichMapFunc());
+        
+        
         // 过滤出 页面数据
         SingleOutputStreamOperator<JSONObject> pageObjDS = jsonWithNewFlagDS
-                .filter(data -> StringUtils.isEmpty(data.getString("start")));
-
+            .filter(data -> StringUtils.isEmpty(data.getString("start")));
+        
         // 按照mid分组，过滤掉不是今天第一次访问的数据
         SingleOutputStreamOperator<JSONObject> uvDS = pageObjDS
-                .keyBy(jsonObj -> jsonObj.getJSONObject("common").getString("mid"))
-                .filter(new UvRichFilterFunction());
-
+            .keyBy(jsonObj -> jsonObj.getJSONObject("common").getString("mid"))
+            .filter(new UvRichFilterFunction());
+        
         // 实时统计uv
         uvDS
-                .map(r -> Tuple3.of("uv", r.getJSONObject("common").getString("mid"), 1L))
-                .returns(Types.TUPLE(Types.STRING, Types.STRING, Types.LONG))
-                .keyBy(r -> r.f0)
-                .reduce((value1, value2) -> Tuple3.of("uv", value2.f1, value1.f2 + value2.f2))
-                .print().setParallelism(1);
+            .map(r -> Tuple3.of("uv", r.getJSONObject("common").getString("mid"), 1L))
+            .returns(Types.TUPLE(Types.STRING, Types.STRING, Types.LONG))
+            .keyBy(r -> r.f0)
+            .reduce((value1, value2) -> Tuple3.of("uv", value2.f1, value1.f2 + value2.f2))
+            .print().setParallelism(1);
         
-        env.execute();
+        env.execute("NoUUidApp");
     }
 }

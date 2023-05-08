@@ -11,32 +11,14 @@ rsync -rvl ${localDir}/${jar} ${remoteUser}@${remoteHost}:${remoteDir}/
 #----------------------------------------------------------------------------
 flink=/opt/module/flink-1.13.6/bin/flink
 remoteJar=${remoteDir}/${jar}
-# class=com.atguigu.bigdata.tune.TMSlotApp
-#class=com.atguigu.bigdata.tune.RocksdbTuningApp
-#class=com.atguigu.bigdata.tune.NoUUidApp
-#class=com.atguigu.bigdata.tune.UUidApp
-#class=com.atguigu.bigdata.tune.BackpressureApp
-#class=com.atguigu.bigdata.tune.SkewApp1
-#class=com.atguigu.bigdata.tune.SkewApp2
-class=com.atguigu.bigdata.tune.SqlApp
+class=com.atguigu.bigdata.tune.TMSlotApp
 otherArgs=" \
--p 4 \
--Dclassloader.check-leaked-classloader=false \
--Drest.flamegraph.enabled=true \
--Dtaskmanager.numberOfTaskSlots=4 \
--Dtaskmanager.memory.process.size=4096m \
--Dstate.backend.latency-track.keyed-state-enabled=true \
--Dmetrics.latency.interval=30000 \
+-p 2 \
 "
-#main_args=" --demo distinct --minibatch true --split-distinct true "
-main_args=" --demo dim-difcount-filter "
-# 通过 ssh 的方式在远程提交 jar
-
 cmd="${flink} run -d \
      -t yarn-per-job \
      ${otherArgs} \
      -c ${class} \
-     ${remoteJar} \
-     ${main_args} "
+     ${remoteJar} "
 echo "${cmd}"
 ssh ${remoteUser}@${remoteHost} "${cmd}"

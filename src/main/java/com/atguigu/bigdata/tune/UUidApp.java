@@ -16,13 +16,14 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 public class UUidApp {
     public static void main(String[] args) throws Exception {
-        
+        System.setProperty("HADOOP_USER_NAME", "atguigu");
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         
         env.enableCheckpointing(3000);
         EmbeddedRocksDBStateBackend rocksdb = new EmbeddedRocksDBStateBackend();
         rocksdb.setPredefinedOptions(PredefinedOptions.DEFAULT);
         env.setStateBackend(rocksdb);
+//        env.getConfig().enableObjectReuse();
         
         CheckpointConfig checkpointConfig = env.getCheckpointConfig();
         checkpointConfig.setCheckpointStorage("hdfs://hadoop162:8020/flink-tuning/ck");
@@ -33,21 +34,25 @@ public class UUidApp {
         
         env.disableOperatorChaining();
         SingleOutputStreamOperator<JSONObject> jsonobjDS = env
-            .addSource(new MockSourceFunction()).uid("mock-source").name("mock-source")
+            .addSource(new MockSourceFunction()).uid("mock-source").name("mock-source_name")
             .map(JSONObject::parseObject).uid("parsejson-map").name("parsejson-map");
+          
         
         
         // 按照mid分组，新老用户修正
         SingleOutputStreamOperator<JSONObject> jsonWithNewFlagDS = jsonobjDS
             .keyBy(data -> data.getJSONObject("common").getString("mid"))
-            .map(new NewMidRichMapFunc()).uid("fixNewMid-map").name("fixNewMid-map")
-            ;
+            .map(new NewMidRichMapFunc()).uid("fixNewMid-map").name("fixNewMid-map");
         
         // 过滤出 页面数据
         SingleOutputStreamOperator<JSONObject> pageObjDS = jsonWithNewFlagDS
-            .filter(data -> StringUtils.isEmpty(data.getString("start")))
-            .uid("page-filter").name("page-filter");
+            .filter(data -> StringUtils.isEmpty(data.getString("start"))).uid("page-filter").name("page-filter")
+            .filter(x -> true).uid("new_filter").name("new_filter_name");
+    
+
         
+    
+    
         // 按照mid分组，过滤掉不是今天第一次访问的数据
         SingleOutputStreamOperator<JSONObject> uvDS = pageObjDS
             .keyBy(jsonObj -> jsonObj.getJSONObject("common").getString("mid"))
